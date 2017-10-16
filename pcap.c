@@ -50,7 +50,8 @@ int main(int argc, char* argv[]) {
 
  
 
-	while (true) {
+while(1)
+{
 
 		struct pcap_pkthdr* header;
 
@@ -83,10 +84,8 @@ int main(int argc, char* argv[]) {
 		printf("dst mac : %x  :  %x  :  %x  :  %x  :  %x  :  %x\n", eth->ether_dhost[0], eth->ether_dhost[1], eth->ether_dhost[2], eth->ether_dhost[3], eth->ether_dhost[4], eth->ether_dhost[5]);
 
 		packet = packet + sizeof(struct libnet_ethernet_hdr);
-
-		if (eth_ethertype == 0x0800)
-
-		{
+if(eth->ether_type)
+{
 
 			printf("src ip : %s\n", inet_ntoa(iphdr->ip_src));
 
@@ -97,12 +96,9 @@ int main(int argc, char* argv[]) {
 			{
 
 				tcphdr = (struct libnet_tcp_hdr *)(packet + iphdr->ip_hl * 4);
-
-				printf("tcp src port : %d \n", ntohs(tcphdr->source));
-
-				printf("tcp dst port : %d \n", ntohs(tcphdr->dest));
-
-				uint32_t tcp_length = iphdr->ip_len - iphdr->ip_hl * 4;
+printf("tcp src port : %d \n",ntohs(tcphdr->src_port));
+printf("tcp dst port : %d \n",ntohs(tcphdr->dest_port));
+uint32_t tcp_length = iphdr->ip_len - iphdr->ip_hl * 4;
 
 				uint32_t tcp_data_len = tcp_length - tcphdr->th_off * 4;
 
