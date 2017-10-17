@@ -10,6 +10,26 @@
 #include <net/ethernet.h>
 #include <netinet/if_ether.h>
 
+void IP(const u_char* packet)
+{
+	struct ip *ip;
+	ip=(struct ip *)packet;//ip header//
+        printf("src ip: %s\n",inet_ntoa(ip->ip_src));
+        printf("dst ip: %s\n",inet_ntoa(ip->ip_dst));
+}
+
+void TCP(const u_char* packet)
+{
+	struct tcphdr *tcp;
+	tcp = (struct tcphdr *)packet;//tcp header//
+        printf("src port: %u\n",ntohs(tcp->source));
+        printf("dst port: %u\n",ntohs(tcp->dest));
+        printf("Data : ");
+        for(int i=0;i<16;i++)
+        {
+        	printf("%02x",*(packet++));
+        }
+}
 
 int main(int argc, char* argv[]) {
 	char errbuf[PCAP_ERRBUF_SIZE];
@@ -19,14 +39,11 @@ int main(int argc, char* argv[]) {
   		fprintf(stderr, "couldn't open device %s: %s\n", dev, errbuf);
   		return -1;
 	}
-
 	while (1) {	
 		struct pcap_pkthdr *header;//packet pointer//
 		struct ether_header *eth;//ethernet heade//
 		struct ip *ip;//ip header//
-		struct tcphdr *tcp;//tcp header//
 		uint8_t *tcp_data;
-		int count;
 		const u_char *packet;//packet//
 		int res=pcap_next_ex(handle,&header,&packet);
 		if(res==-1||res==-2) break;
@@ -41,22 +58,11 @@ int main(int argc, char* argv[]) {
 		if(eth->ether_type==0x0800)
 		{
 			ip=(struct ip *)packet;//ip header//
-			count=sizeof(struct ip);
-			printf("src ip: %s\n",inet_ntoa(ip->ip_src));
-			printf("dst ip: %s\n",inet_ntoa(ip->ip_dst));
-			printf("%p\n", ip);
+			IP(packet);
 			packet +=sizeof(struct ip);
 			if(ip->ip_p==IPPROTO_TCP)
-			{
-				
-				tcp = (struct tcphdr *)packet;//tcp header//
-				printf("src port: %d\n",ntohs(tcp->source));
-				printf("dst port: %d\n",ntohs(tcp->dest));
-				printf("Data : ");
-				for(int i=0;i<16;i++)
-				{
-					printf("%02x",*(packet++));
-				}
+			{				
+				TCP(packet);
 			}
 		}
 		printf("\n=====================================================\n");
